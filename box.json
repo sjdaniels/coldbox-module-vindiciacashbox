@@ -1,0 +1,29 @@
+{
+    "name":"Vindicia CashBox API",
+    "version":"1.0.0+0001",
+    "author":"Sean Daniels <sdaniels@padawan.net>",
+    "homepage":"https://github.com/sjdaniels/coldbox-module-vindiciacashbox",
+    "documentation":"https://github.com/sjdaniels/coldbox-module-vindiciacashbox/blob/master/README.md",
+    "repository":{
+        "type":"git",
+        "URL":"https://github.com/sjdaniels/coldbox-module-vindiciacashbox.git"
+    },
+    "slug":"vindiciacashbox",
+    "shortDescription":"Helpers for interfacing SOAP webservice for Vindicia CashBox billing management service",
+    "type":"modules",
+    "packageDirectory":"vindiciacashbox",
+    "keywords":[],
+    "private":true,
+    "engines":[
+        {
+            "type":"lucee",
+            "version":">4.5"
+        },
+        {
+            "type":"adobe",
+            "version":">9.02"
+        }
+    ],
+    "dependencies":{
+    }
+}
