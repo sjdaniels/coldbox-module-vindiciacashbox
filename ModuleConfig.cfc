@@ -44,7 +44,7 @@ Optional Methods
 component {
 
 	// Module Properties
-	this.title 				= "vindicia-cashbox";
+	this.title 				= "cashbox";
 	this.author 			= "Sean Daniels";
 	this.webURL 			= "http://braunsmedia.com";
 	this.description 		= "A module for interfacing with the Vindicia CashBox API";
@@ -88,22 +88,16 @@ component {
 
 		// Interceptors
 		interceptors = [
+			{ class="#moduleMapping#.interceptors.ClientConfig", name="ClientConfig@#this.modelNamespace#" }
 		];
 
 		// Binder Mappings
 		// binder.map("Alias").to("#moduleMapping#.model.MyService");
 	}
 
-	/**
-	* Fired when the module is registered and activated.
-	*/
 	function onLoad(){
-
 	}
 
-	/**
-	* Fired when the module is unregistered and unloaded
-	*/
 	function onUnload(){
 
 	}
