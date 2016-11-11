@@ -65,25 +65,12 @@ component {
 	this.dependencies 		= [];
 
 	function configure(){
-
 		// parent settings
 		parentSettings = {
-
 		};
 
 		// module settings - stored in modules.name.settings
 		settings = {
-
-		};
-
-		// Layout Settings
-		layoutSettings = {
-			defaultLayout = ""
-		};
-
-		// datasources
-		datasources = {
-
 		};
 
 		// SES Routes
@@ -99,13 +86,12 @@ component {
 			customInterceptionPoints = ""
 		};
 
-		// Custom Declared Interceptors
+		// Interceptors
 		interceptors = [
 		];
 
 		// Binder Mappings
 		// binder.map("Alias").to("#moduleMapping#.model.MyService");
-
 	}
 
 	/**
@@ -121,5 +107,4 @@ component {
 	function onUnload(){
 
 	}
-
 }
