@@ -14,7 +14,7 @@ component {
 		return resp;
 	}
 
-	any function create(required string merchantAccountID, string defaultCurrency="USD", required string email, string lang="en", boolean warnAutoBill=false, string company="", required string name) {
+	any function update(required string merchantAccountID, string defaultCurrency="USD", required string email, string lang="en", boolean warnAutoBill=false, string company="", required string name) {
 		var Account = Factory.get("com.vindicia.client.Account");
 		Account.setMerchantAccountID(arguments.merchantAccountID);
 		Account.setDefaultCurrency(arguments.defaultCurrency);
