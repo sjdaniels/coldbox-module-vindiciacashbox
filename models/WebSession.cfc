@@ -28,13 +28,17 @@ component {
 	}
 
 	public struct function getAutobill() {
+		local.update = getWSO().getApiReturnValues().getAutoBillUpdate();
+		if (isnull(local.update))
+			return {};
+
 		// persist the initial transaction
-		variables.transaction = getWSO().getApiReturnValues().getAutoBillUpdate().getInitialTransaction();
+		variables.transaction = local.update.getInitialTransaction();
 
 		// persist the fraud score
-		variables.score = getWSO().getApiReturnValues().getAutoBillUpdate().getScore();
+		variables.score = local.update.getScore();
 
-		local.autobill = getWSO().getApiReturnValues().getAutoBillUpdate().getAutobill();
+		local.autobill = local.update.getAutobill();
 
 		if (isnull(local.autobill))
 			return {};
@@ -45,9 +49,9 @@ component {
 		return [ "last":local.autobill.getItems(0).getProduct().getMerchantProductID(), "next":local.autobill.getItems(0).getProduct().getMerchantProductID(), "dateNext":local.autobill.getNextBilling().getTimestamp().getTime(), "currency":local.autobill.getCurrency() ];
 	}
 
-	public numeric function getScore() {
+	public any function getScore() {
 		if (isnull(variables.score))
-			throw("No fraud score available.","VindicaCashboxModuleWebsessionException");
+			return;
 
 		return variables.score;
 	}
@@ -76,9 +80,9 @@ component {
 		return result;
 	}
 
-	public struct function getTransaction() {
+	public any function getTransaction() {
 		if (isnull(variables.transaction))
-			throw("No transaction available.","VindicaCashboxModuleWebsessionException");
+			return;
 
 		var txn = variables.transaction;
 		var items = [];
