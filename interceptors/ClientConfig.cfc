@@ -10,6 +10,7 @@ component output="false" extends="coldbox.system.Interceptor"  {
 		ClientConstants.DEFAULT_VINDICIA_SERVICE_URL = settings.host;
 		ClientConstants.SOAP_LOGIN = settings.username;
 		ClientConstants.SOAP_PASSWORD = settings.password;
+		ClientConstants.USE_HTTP_COMPRESSION = false;
 		ClientConstants.DEFAULT_TIMEOUT = 30000; // 30 seconds
 	}
 }

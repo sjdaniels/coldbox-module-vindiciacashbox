@@ -1,6 +1,7 @@
 component {
 
 	property name="Factory" inject="ObjectFactory@cashbox";
+	property name="LogService" inject="LogService@cashbox";
 
 	function getWebSession() provider="WebSession@cashbox" {}; 
 
@@ -34,6 +35,8 @@ component {
 
 		local.result = ws.initialize(nullValue());
 
+		LogService.log( local.result.getSoapId(), "WebSession", "initialize" );
+
 		return getWebSession().populate( ws );
 	}
 
@@ -42,6 +45,15 @@ component {
 		ws.setVID( arguments.vid );
 
 		return getWebSession().populate( ws );
+	}
+
+	public WebSession function finalize(required string sessionID) {
+		var ws = getByVID(arguments.sessionID);
+		var wso = ws.getWSO();
+    	local.result = wso.finalize_via_SOAP(nullValue());
+
+		LogService.log( local.result.getSoapId(), "WebSession", "finalize" );
+    	return ws;
 	}
 
 }
