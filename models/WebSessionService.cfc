@@ -38,7 +38,7 @@ component {
 		LogService.log( local.result.getSoapId(), "WebSession", "initialize", local.result.getReturnCode().getValue(), local.result.getReturnString() );
 
 		if (local.result.getReturnCode().getValue() != 200) {
-			throw("Vindicia API Exception","VindiciaWebSessionException",local.result.getReturnString(),local.result.getReturnCode().getValue());
+			_throw(local.result.getReturnString(), local.result.getReturnCode().getValue());
 		}
 
 		return getWebSession().populate( ws );
@@ -57,7 +57,15 @@ component {
     	local.result = wso.finalize_via_SOAP(nullValue());
 
 		LogService.log( local.result.getSoapId(), "WebSession", "finalize", local.result.getReturnCode().getValue(), local.result.getReturnString() );
+
+		if (local.result.getReturnCode().getValue() != 200) {
+			_throw(local.result.getReturnString(), local.result.getReturnCode().getValue());
+		}
+
     	return ws;
 	}
 
+	private function _throw(required numeric code, required string message) {
+		throw("Vindicia API Exception","VindiciaWebSessionException",arguments.message,arguments.code);
+	}
 }
