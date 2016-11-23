@@ -114,4 +114,15 @@ component {
 
 		return result;
 	}
+
+	public boolean function getAccountUpdatePaymentMethod() {
+		local.update = getWSO().getApiReturnValues().getAccountUpdatePaymentMethod();
+		if (isnull(local.update) || !local.update.getValidated())
+			return false;
+
+		// persist the payment method
+		variables.paymentmethod = local.update.getAccount().getPaymentMethods(0);
+
+		return true;
+	}
 }
