@@ -57,15 +57,10 @@ component {
     	local.result = wso.finalize_via_SOAP(nullValue());
 
 		LogService.log( local.result.getSoapId(), "WebSession", "finalize", local.result.getReturnCode().getValue(), local.result.getReturnString() );
-
-		if (local.result.getReturnCode().getValue() != 200) {
-			_throw(local.result.getReturnString(), local.result.getReturnCode().getValue());
-		}
-
     	return ws;
 	}
 
-	private function _throw(required numeric code, required string message) {
+	private function _throw(required string message, required numeric code) {
 		throw("Vindicia API Exception","VindiciaWebSessionException",arguments.message,arguments.code);
 	}
 }
