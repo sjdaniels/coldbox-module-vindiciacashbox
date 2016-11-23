@@ -88,17 +88,25 @@ component {
 
 		// Interceptors
 		interceptors = [
-			{ class="#moduleMapping#.interceptors.ClientConfig", name="ClientConfig@#this.modelNamespace#" }
 		];
 
 		// Binder Mappings
 		// binder.map("Alias").to("#moduleMapping#.model.MyService");
 	}
 
+	public void function afterConfigurationLoad(event,interceptData){
+		var settings = controller.getSetting("vindicia");
+		var ClientConstants = wirebox.getInstance("ObjectFactory@cashbox").get("com.vindicia.client.ClientConstants");
+		ClientConstants.DEFAULT_VINDICIA_SERVICE_URL = settings.host;
+		ClientConstants.SOAP_LOGIN = settings.username;
+		ClientConstants.SOAP_PASSWORD = settings.password;
+		ClientConstants.USE_HTTP_COMPRESSION = false;
+		ClientConstants.DEFAULT_TIMEOUT = 30000; // 30 seconds
+	}
+	
 	function onLoad(){
 	}
 
 	function onUnload(){
-
 	}
 }
