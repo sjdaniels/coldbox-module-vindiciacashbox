@@ -4,6 +4,8 @@ component {
 	property name="logbox" inject="logbox";
 
 	void function log( required string soapID, required string object, required string method, required numeric returnCode, required string returnString ) {
+		arguments.returncode = javacast("numeric",arguments.returncode);
+
 		if (wirebox.containsInstance("MongoDB")) {
 			wirebox.getInstance("MongoDB").getCollection("vindiciacashbox_soap_log").save(["object":arguments.object, "method":arguments.method, "soapID":arguments.soapID, "returnCode":arguments.returnCode, "returnString":arguments.returnString]);
 			return;

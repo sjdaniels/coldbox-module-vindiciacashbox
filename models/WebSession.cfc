@@ -16,45 +16,45 @@ component {
 	public struct function getResult() {
 		var wso = getWSO();
 		var result = {};
-		result.code = wso.getApiReturn().getReturnCode().toString();
-		result.message = wso.getApiReturn().getReturnString();
+		result["code"] = wso.getApiReturn().getReturnCode().toString();
+		result["message"] = wso.getApiReturn().getReturnString();
 
 		if (wso.getApiReturn().getReturnCode().toString()=="200") {
-			result.success = true;
+			result["success"] = true;
 		} else {
-			result.success = false;
+			result["success"] = false;
 		}
 		return result;
 	}
 
-	public struct function getAutobill() {
-		local.update = getWSO().getApiReturnValues().getAutoBillUpdate();
-		if (isnull(local.update))
-			return {};
+	// public struct function getAutobill() {
+	// 	local.update = getWSO().getApiReturnValues().getAutoBillUpdate();
+	// 	if (isnull(local.update))
+	// 		return {};
 
-		// persist the initial transaction
-		variables.transaction = local.update.getInitialTransaction();
+	// 	// persist the initial transaction
+	// 	variables.transaction = local.update.getInitialTransaction();
 
-		// persist the fraud score
-		variables.score = local.update.getScore();
+	// 	// persist the fraud score
+	// 	variables.score = local.update.getScore();
 
-		local.autobill = local.update.getAutobill();
+	// 	local.autobill = local.update.getAutobill();
 
-		if (isnull(local.autobill))
-			return {};
+	// 	if (isnull(local.autobill))
+	// 		return {};
 
-		// persist the payment method
-		variables.paymentmethod = local.autobill.getPaymentMethod();
+	// 	// persist the payment method
+	// 	variables.paymentmethod = local.autobill.getPaymentMethod();
 
-		return [ "last":local.autobill.getItems(0).getProduct().getMerchantProductID(), "next":local.autobill.getItems(0).getProduct().getMerchantProductID(), "dateNext":local.autobill.getNextBilling().getTimestamp().getTime(), "currency":local.autobill.getCurrency() ];
-	}
+	// 	return [ "last":local.autobill.getItems(0).getProduct().getMerchantProductID(), "next":local.autobill.getItems(0).getProduct().getMerchantProductID(), "dateNext":local.autobill.getNextBilling().getTimestamp().getTime(), "currency":local.autobill.getCurrency() ];
+	// }
 
-	public any function getScore() {
-		if (isnull(variables.score))
-			return;
+	// public any function getScore() {
+	// 	if (isnull(variables.score))
+	// 		return;
 
-		return variables.score;
-	}
+	// 	return variables.score;
+	// }
 
 	public struct function getPaymentMethod() {
 		if (isnull(variables.paymentmethod))
@@ -80,44 +80,44 @@ component {
 		return result;
 	}
 
-	public any function getTransaction() {
-		if (isnull(variables.transaction))
-			return;
+	// public any function getTransaction() {
+	// 	if (isnull(variables.transaction))
+	// 		return;
 
-		var txn = variables.transaction;
-		var items = [];
-		for (var item in txn.getTransactionItems()) {
-			if (item.sku != "Total Tax")
-				items.append(item.getSku());
-		}
+	// 	var txn = variables.transaction;
+	// 	var items = [];
+	// 	for (var item in txn.getTransactionItems()) {
+	// 		if (item.sku != "Total Tax")
+	// 			items.append(item.getSku());
+	// 	}
 
-		var statuslog = [];
-		for (var statusentry in txn.getStatusLog()) {
-			statuslog.append(statusentry.getStatus().getValue());
-		}
+	// 	var statuslog = [];
+	// 	for (var statusentry in txn.getStatusLog()) {
+	// 		statuslog.append(statusentry.getStatus().getValue());
+	// 	}
 
-		var result = {
-			 "memberID":txn.getAccount().getMerchantAccountID()
-			,"amount":javacast("numeric",txn.getAmount())
-			// ,"amountOriginal":javacast("numeric",txn.getOriginalAmount())
-			,"billingPlanCycle":txn.getBillingPlanCycle()
-			,"currency":txn.getCurrency()
-			,"paymentMethodID":txn.getSourcePaymentMethod().getMerchantPaymentMethodID()
-			,"affiliateID":txn.getMerchantAffiliateID()
-			,"vid":txn.getVID()
-			,"id":txn.getMerchantTransactionID()
-			,"ip":txn.getSourceIP()
-			,"items":items
-			,"statuslog":statuslog
-			,"dateCreated":txn.getTimestamp().getTime()
-		}
+	// 	var result = {
+	// 		 "memberID":txn.getAccount().getMerchantAccountID()
+	// 		,"amount":javacast("numeric",txn.getAmount())
+	// 		// ,"amountOriginal":javacast("numeric",txn.getOriginalAmount())
+	// 		,"billingPlanCycle":txn.getBillingPlanCycle()
+	// 		,"currency":txn.getCurrency()
+	// 		,"paymentMethodID":txn.getSourcePaymentMethod().getMerchantPaymentMethodID()
+	// 		,"affiliateID":txn.getMerchantAffiliateID()
+	// 		,"vid":txn.getVID()
+	// 		,"id":txn.getMerchantTransactionID()
+	// 		,"ip":txn.getSourceIP()
+	// 		,"items":items
+	// 		,"statuslog":statuslog
+	// 		,"dateCreated":txn.getTimestamp().getTime()
+	// 	}
 
-		return result;
-	}
+	// 	return result;
+	// }
 
 	public boolean function getAccountUpdatePaymentMethod() {
 		local.update = getWSO().getApiReturnValues().getAccountUpdatePaymentMethod();
-		if (isnull(local.update) || !local.update.getValidated())
+		if (isnull(local.update) || isnull(local.update.getAccount()))
 			return false;
 
 		// persist the payment method
