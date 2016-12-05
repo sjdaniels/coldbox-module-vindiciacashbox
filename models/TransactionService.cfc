@@ -4,6 +4,8 @@ component {
 	property name="settings" inject="coldbox:setting:vindicia";
 	property name="LogService" inject="LogService@cashbox";
 
+	function getTransaction() provider="Transaction@cashbox" {}
+
 	struct function authCapture(required string id, required string ip, required string accountID, required string paymentmethodID, required array products, string affiliateID="", string currency="USD", string billingStatementID, boolean sendEmailNotification=false, numeric minChargebackProbability=100) {
 		arguments.authOnly = false;
 		return auth( argumentCollection = arguments );
@@ -27,7 +29,7 @@ component {
 		PaymentMethod.setMerchantPaymentMethodID( arguments.paymentmethodID );
 		Transaction.setSourcePaymentMethod( PaymentMethod );
 
-		if (!isnull(arguments.affiliateID))
+		if (!isempty(arguments.affiliateID))
 			Transaction.setMerchantAffiliateID( arguments.affiliateID );
 
 		if (!isnull(arguments.billingStatementID)) {
@@ -119,5 +121,31 @@ component {
 		LogService.log( result.soapID, "Transaction", "capture", result.code, result.message );		
 
 		return result;
+	}
+
+	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize) {
+		var result = [];
+		var Transaction = Factory.get("com.vindicia.client.Transaction");
+		var e;
+
+		local.start = createobject("java","java.util.GregorianCalendar");
+		local.end = createobject("java","java.util.GregorianCalendar");
+
+		local.start.setTime( arguments.tsDelta );
+		local.end.setTime( now() );
+
+		try {
+			// java.lang.String srd, java.util.Calendar timestamp, java.util.Calendar endTimestamp, java.lang.Integer page, java.lang.Integer pageSize, PaymentMethod paymentMethod
+			var response = Transaction.fetchDeltaSince("", local.start, local.end, arguments.page, arguments.pageSize, nullValue());
+			for (local.txn in (response?:[])) {
+				result.append( getTransaction().populate(local.txn) );
+			}
+
+			return result;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			LogService.log( e.soapID, "Transaction", "fetchDeltaSince", e.returnCode, e.message );		
+			rethrow;
+		}
 	}
 }
