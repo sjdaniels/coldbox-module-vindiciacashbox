@@ -65,6 +65,7 @@ component {
 
 		if (result.type == "CreditCard") {
 			local.creditcard = pm.getCreditCard();
+			local.billingAddress = pm.getBillingAddress();
 			result["accountmask"] = local.creditcard.getAccount();
 			result["bin"] = local.creditcard.getBin();
 			result["lastdigits"] = local.creditcard.getLastDigits();
@@ -73,6 +74,11 @@ component {
 			result["accountLength"] = local.creditcard.getAccountLength();
 			result["vid"] = pm.getVID();
 			result["id"] = pm.getMerchantPaymentMethodID();
+			
+			if (!isnull(local.billingAddress)) {
+				result["country"] = local.billingAddress.getCountry();
+				result["zip"] = local.billingAddress.getPostalCode();
+			}
 		}
 
 		// process other types
