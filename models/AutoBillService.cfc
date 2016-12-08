@@ -57,4 +57,18 @@ component {
 	
 		return result;
 	}
+
+	any function getNextBillingDate( required string autobillID ) {
+		local.autobill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+		if (isnull(local.autobill))
+			return;
+
+		local.nextbilling = local.autobill.getNextBilling();
+		if (isnull(local.nextbilling))
+			return;
+
+		local.result = local.nextbilling.getTimestamp().getTime();
+
+		return local.result;
+	}
 }
