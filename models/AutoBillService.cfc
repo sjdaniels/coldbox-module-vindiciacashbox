@@ -58,7 +58,7 @@ component {
 		return result;
 	}
 
-	any function getNextBillingDate( required string autobillID ) {
+	function getNextBillingDate( required string autobillID ) {
 		local.autobill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
 		if (isnull(local.autobill))
 			return;
@@ -70,5 +70,27 @@ component {
 		local.result = local.nextbilling.getTimestamp().getTime();
 
 		return local.result;
+	}
+
+	struct function cancel( required string autobillID, boolean disentitle=false, boolean settle=false, boolean sendNotice=false, string reasonCode="" ) {
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+
+		var result = { message:"OK", code:200, success:true }
+		try {
+			// java.lang.String srd, boolean disentitle, boolean force, java.lang.Boolean settle, java.lang.Boolean sendCancellationNotice, java.lang.String cancelReasonCode
+			result.return = AutoBill.cancel("", arguments.disentitle, false, arguments.settle, arguments.sendNotice, arguments.reasonCode);
+			result.soapID = result.return.getReturnObject().getSoapID();
+			result.autobill = AutoBill;
+			result.dateExpires = AutoBill.getEndTimestamp().getTime();
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+		}
+
+		LogService.log( result.soapID, "AutoBill", "cancel", result.code, result.message );
+		return result;
 	}
 }
