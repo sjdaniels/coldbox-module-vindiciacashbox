@@ -123,6 +123,33 @@ component {
 		return result;
 	}
 
+	struct function refund(required string transactionID, numeric amount) {
+		var Transaction = Factory.get("com.vindicia.client.Transaction").fetchByMerchantTransactionID("",arguments.transactionID );
+		var Refund = Factory.get("com.vindicia.client.Refund");
+		var RefundClient = Factory.get("com.vindicia.client.Refund");
+
+		Refund.setTransaction( Transaction );
+		Refund.setAmount( javacast("java.math.BigDecimal",arguments.amount) );
+
+		var e;
+		var result = { message:"OK", code:200 }
+
+		try {
+			result.refunds = RefundClient.perform( "", [ Refund ] );
+			result.refund = result.refunds[1];
+			result.success = (result.refund.getStatus().getValue() != "Failed");
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+		}
+
+		LogService.log( result.soapID, "Refund", "perform", result.code, result.message );		
+		return result;		
+	}
+
 	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize) {
 		var result = [];
 		var Transaction = Factory.get("com.vindicia.client.Transaction");
