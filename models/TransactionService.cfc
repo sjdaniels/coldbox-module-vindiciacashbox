@@ -140,7 +140,7 @@ component {
 			result.success = (result.refund.getStatus().getValue() != "Failed");
 		}
 		catch (com.vindicia.client.VindiciaReturnException e) {
-			LogService.log( e.soapID, "Refund", "perform", result.returncode, e.message );		
+			LogService.log( e.soapID, "Refund", "perform", e.returncode, e.message );		
 			rethrow;
 		}
 
