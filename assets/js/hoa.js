@@ -16,17 +16,9 @@
 		e.preventDefault();
 
 		$.log("Posting to HOA url " + hoaURL);
-		var fields = {
-			  vin_PaymentMethod_accountHolderName: $('#cardholder').val()
-			, vin_PaymentMethod_billingAddress_postalCode: $('#postalCode').val()
-			, vin_PaymentMethod_billingAddress_country: $('#country').val()
-			, vin_PaymentMethod_creditCard_account: $('#accountNum').val()
-			, vin_PaymentMethod_creditCard_expirationDate_month: $('#ccExpM').val()
-			, vin_PaymentMethod_creditCard_expirationDate_year: $('#ccExpY').val()
-			, vin_PaymentMethod_nameValues_cvn: $('#cvn').val()
-			, vin_ajax: 1
-			, vin_WebSession_VID: sessionID			
-		}
+		
+		var fields = $form.serializeArray();
+		fields.push({name:"vin_ajax", value:"1"});
 
 		$.ajax({
 			 method:"POST"
@@ -35,7 +27,6 @@
 			,error:onError
 			,data:fields
 		});
-
 	}
 
 	function onError(response) {
@@ -45,6 +36,13 @@
 		$wsvid.val( sessionID );
 
 		$form.trigger('unsubmit');
+
+		// reset account fields
+		$('#vin_PaymentMethod_creditCard_account').val('');
+		$('#vin_PaymentMethod_creditCard_expirationDate_month').val('');
+		$('#vin_PaymentMethod_creditCard_expirationDate_year').val('');
+		$('#vin_PaymentMethod_nameValues_cvn').val('');		
+
 		$('#paymentMethodUpdateError #validationError').html( response.responseJSON.validationError );
 		$('#paymentMethodUpdateError h2.modal-title').html( response.responseJSON.validationHeader );
 		$('#paymentMethodUpdateError').modal();
@@ -65,10 +63,10 @@
 		$form.data('submitted',false);
 
 		// clear sensitive fields
-		$('#accountNum').val('*************');
-		$('#ccExpM').val('**');
-		$('#ccExpY').val('****');
-		$('#cvn').val('***');
+		$('#vin_PaymentMethod_creditCard_account').val('*************');
+		$('#vin_PaymentMethod_creditCard_expirationDate_month').val('**');
+		$('#vin_PaymentMethod_creditCard_expirationDate_year').val('****');
+		$('#vin_PaymentMethod_nameValues_cvn').val('***');
 
 		$form.submit();
 	}
