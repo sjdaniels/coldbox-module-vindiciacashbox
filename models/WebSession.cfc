@@ -50,7 +50,7 @@ component {
 			result["bin"] = local.creditcard.getBin();
 			result["lastdigits"] = local.creditcard.getLastDigits();
 			result["dateExpires"] = createDate( left(local.creditcard.getExpirationDate(),4), right(local.creditcard.getExpirationDate(),2), daysInMonth(createDate(left(local.creditcard.getExpirationDate(),4), right(local.creditcard.getExpirationDate(),2),1)) );
-			result["cardholder"] = pm.getAccountHolderName();
+			result["accountHolder"] = pm.getAccountHolderName();
 			result["accountLength"] = local.creditcard.getAccountLength();
 			result["vid"] = pm.getVID();
 			result["id"] = pm.getMerchantPaymentMethodID();
