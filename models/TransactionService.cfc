@@ -60,9 +60,10 @@ component {
 				result.return = Transaction.authCapture("", arguments.sendEmailNotification, false, false, "", false, arguments.minChargebackProbability)
 			}
 			result.soapID = result.return.getReturnObject().getSoapID();
-			result.transaction = Transaction;
+			result.transactionObj = Transaction;
+			result.transaction = getTransaction().populate( Transaction );
 
-			if (result.transaction.getStatusLog(0).getStatus().getValue()!="Authorized") {
+			if (result.transactionObj.getStatusLog(0).getStatus().getValue()!="Authorized") {
 				result.code = 400;
 				result.message = "Transaction Not Authorized";
 				result.success = false;
