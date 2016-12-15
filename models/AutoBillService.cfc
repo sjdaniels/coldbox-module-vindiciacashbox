@@ -5,8 +5,7 @@ component {
 	property name="LogService" inject="LogService@cashbox";
 
 	struct function update(required string id, required string ip, required string accountID, required string paymentmethodID, required string productID, string affiliateID="", string currency="USD", string billingStatementID, numeric minChargebackProbability=100) {
-		var ClientConstants = Factory.get("com.vindicia.client.ClientConstants");
-		var classVersion = "v#replace(ClientConstants.getVersion(),'.','_','all')#";
+		var classVersion = Factory.getClassVersion();
 		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
 		var e;
 

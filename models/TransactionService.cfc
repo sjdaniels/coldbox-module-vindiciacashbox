@@ -12,8 +12,7 @@ component {
 	}
 
 	struct function auth(required string id, required string ip, required string accountID, required string paymentmethodID, required array products, string affiliateID="", string currency="USD", string billingStatementID, boolean sendEmailNotification=false, numeric minChargebackProbability=100, boolean authOnly=true) {
-		var ClientConstants = Factory.get("com.vindicia.client.ClientConstants");
-		var classVersion = "v#replace(ClientConstants.getVersion(),'.','_','all')#";
+		var classVersion = Factory.getClassVersion();
 		var Transaction = Factory.get("com.vindicia.client.Transaction");
 		var e;
 
