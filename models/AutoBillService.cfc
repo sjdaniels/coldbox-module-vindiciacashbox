@@ -92,4 +92,30 @@ component {
 		LogService.log( result.soapID, "AutoBill", "cancel", result.code, result.message );
 		return result;
 	}
+
+	struct function resume( required string autobillID ) {
+		var classVersion = Factory.getClassVersion();
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+
+		// this uses a hack to restart existing AutoBills. Not guaranteed to continue to work if Vindicia changes something...
+		var AutoBillStatus = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillStatus").fromString("Active");
+		AutoBill.setStatus( AutoBillStatus );
+
+		var result = { message:"OK", code:200, success:true }
+
+		try {
+			result.return = AutoBill.update("", nullValue(), false, 100, true, true, "", false, "");
+			result.soapID = result.return.getReturnObject().getSoapID();
+			result.autobill = AutoBill;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+		}
+
+		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
+		return result;
+	}
 }
