@@ -97,6 +97,10 @@ component {
 		var classVersion = Factory.getClassVersion();
 		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
 
+		if (AutoBill.getStatus().getValue() != "Pending Cancel") {
+			throw("AutoBill #arguments.autobillID# can not be resumed - status is #AutoBill.getStatus().getValue()#");
+		}
+
 		// this uses a hack to restart existing AutoBills. Not guaranteed to continue to work if Vindicia changes something...
 		var AutoBillStatus = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillStatus").fromString("Active");
 		AutoBill.setStatus( AutoBillStatus );
