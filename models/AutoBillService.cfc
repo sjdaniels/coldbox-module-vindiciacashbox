@@ -113,10 +113,8 @@ component {
 			result.autobill = AutoBill;
 		}
 		catch (com.vindicia.client.VindiciaReturnException e) {
-			result.code = e.returncode;
-			result.message = e.message;
-			result.success = false;
-			result.soapID = e.soapID;
+			LogService.log( e.soapID, "AutoBill", "update", e.returncode, e.message );
+			rethrow;
 		}
 
 		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
