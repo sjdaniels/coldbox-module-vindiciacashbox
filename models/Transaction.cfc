@@ -12,17 +12,18 @@ component {
 		var txn = variables.TransactionObj;
 		var items = [];
 		for (var item in txn.getTransactionItems()) {
-			if (item.sku != "Total Tax")
-				items.append(item.getSku());
+			if (item.sku != "Total Tax") {
+				items.append({"productID":item.getSku(), "subtotal":javacast("numeric",item.getSubtotal()?:0), "price":javacast("numeric",item.getPrice()?:0), "quantity":javacast("numeric",item.getQuantity()?:0)});
+			}
 		}
 
 		var statuslog = [];
-		for (var statusentry in txn.getStatusLog()) {
+		for (var statusentry in (txn.getStatusLog()?:[])) {
 			statuslog.append(statusentry.getStatus().getValue());
 		}
 
 		var result = {
-			 "memberID":txn.getAccount().getMerchantAccountID()
+			 "memberID":!isnull(txn.getAccount()) ? txn.getAccount().getMerchantAccountID() : "noaccountid"
 			,"amount":javacast("numeric",txn.getAmount())
 			,"billingPlanCycle":txn.getBillingPlanCycle()
 			,"currency":txn.getCurrency()
