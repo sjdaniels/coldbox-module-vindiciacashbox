@@ -4,6 +4,9 @@ component {
 	property name="settings" inject="coldbox:setting:vindicia";
 	property name="LogService" inject="LogService@cashbox";
 
+	function getTransaction() provider="Transaction@cashbox" {}
+	function getRefund() provider="Refund@cashbox" {}
+
 	struct function update(required string id, required string ip, required string accountID, required string paymentmethodID, required string productID, string affiliateID="", string currency="USD", string billingStatementID, numeric minChargebackProbability=100) {
 		var classVersion = Factory.getClassVersion();
 		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
@@ -118,6 +121,70 @@ component {
 		}
 
 		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
+		return result;
+	}
+
+	struct function modify( required string autobillID, boolean prorate=true, string effectiveDate="today", string replaceBillingPlan, array replaceProducts=[], boolean dryrun=false ) {
+		var classVersion = Factory.getClassVersion();
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+		var ItemModifications = [];
+
+		for (local.replaceProduct in arguments.replaceProducts) {
+			var RemoveProduct = Factory.get("com.vindicia.client.Product");
+			RemoveProduct.setMerchantProductID( local.replaceProduct.remove );
+			var RemoveItem = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItem");
+			RemoveItem.setProduct( RemoveProduct );
+
+			var AddProduct = Factory.get("com.vindicia.client.Product").fetchByMerchantProductID("", local.replaceProduct.add);
+			var AddItem = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItem");
+			AddItem.setProduct( AddProduct );
+		
+			var Modification = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItemModification");
+			Modification.setRemoveAutobillItem( RemoveItem );
+			Modification.setAddAutobillItem( AddItem );
+		
+			ItemModifications.append( Modification );
+		}
+
+		var NewBillingPlan;
+		if (!isnull(arguments.replaceBillingPlan)) {
+			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan").fetchByMerchantBillingPlanID("", arguments.replaceBillingPlan);
+		}
+
+		if (isnull(arguments.replaceBillingPlan) && arguments.replaceProducts.len()==1) {
+		// set the new billingplan to the default for the new product
+			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan").fetchByMerchantBillingPlanID("", AddProduct.getDefaultBillingPlan().getMerchantBillingPlanID());
+		}
+
+		var result = { message:"OK", code:200, success:true }
+		try {
+			// java.lang.String srd, boolean billProratedPeriod, java.lang.String effectiveDate, BillingPlan changeBillingPlanTo, AutoBillItemModification[] autoBillItemModifications, java.lang.Boolean dryrun
+			// valid values for effectiveDate are "today" and "nextBill"
+			result.return = AutoBill.modify("", arguments.prorate, arguments.effectiveDate, NewBillingPlan?:nullValue(), ItemModifications, arguments.dryrun);
+			result.soapID = result.return.getReturnObject().getSoapID();
+			result.autobill = AutoBill;
+			result.dateNextBilling = AutoBill.getNextBilling().getTimestamp().getTime();
+
+			if (!isnull(result.return.getTransaction()))
+				result.transaction = getTransaction().populate( result.return.getTransaction() );
+			
+			result.refunds = [];
+			if (!isnull(result.return.getRefunds())) {
+				for (local.refund in result.return.getRefunds()) {
+					result.refunds.append( getRefund().populate( local.refund ) );
+				}
+			}
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+			LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message );
+			rethrow;
+		}
+
+		LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message );
 		return result;
 	}
 }
