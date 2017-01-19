@@ -187,4 +187,94 @@ component {
 		LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message );
 		return result;
 	}
+
+	struct function migrate( required string id, required string accountID, required string productID, required date dateStarted, required struct lastTransaction, required numeric billingCycle, date dateNextBilling, string affiliateID="", string currency="USD", string billingStatementID ) {
+		var classVersion = Factory.getClassVersion();
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
+		var e;
+
+		AutoBill.setMerchantAutoBillID( arguments.id );
+		AutoBill.setCurrency( arguments.currency );
+		AutoBill.setStartTimestamp( arguments.dateStarted );
+
+		var Account = Factory.get("com.vindicia.client.Account");
+		Account.setMerchantAccountID( arguments.accountID );
+		AutoBill.setAccount( Account );
+
+		var Item = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItem");
+		var Product = Factory.get("com.vindicia.client.Product");
+
+		Product.setMerchantProductID( arguments.productID );
+
+		Item.setMerchantAutoBillItemID( createuuid() );
+		Item.setProduct( Product );
+		AutoBill.setItems( [Item] );
+
+		if (!isnull(arguments.affiliateID))
+			AutoBill.setMerchantAffiliateID( arguments.affiliateID );
+
+		if (!isnull(arguments.billingStatementID)) {
+			AutoBill.setBillingStatementIdentifier( arguments.billingStatementID );
+		}
+
+		var TxnItem = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransactionItem");
+		var TxnItemType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransactionItemType").fromString("RecurringCharge");
+		TxnItem.setItemType(TxnItemType);
+		TxnItem.setName( arguments.lastTransaction.productname );
+		TxnItem.setPrice( javacast("java.math.BigDecimal", arguments.lastTransaction.price) );
+		TxnItem.setServicePeriodStartDate( arguments.lastTransaction.dateCreated );
+		TxnItem.setServicePeriodEndDate( arguments.lastTransaction.datePeriodEnds );
+		TxnItem.setSku( arguments.productID );
+
+		var creditCardStatusA = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatusCreditCard");
+		var statusLog = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatus");
+		var PaymentMethodType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.PaymentMethodType").fromString("CreditCard");
+		var PaymentStatus = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatusType").fromString("Captured");
+		creditCardStatus.setAuthCode('000');
+		statusLog.setCreditCardStatus(creditCardStatus);
+		statusLog.setPaymentMethodType(PaymentMethodType);
+		statusLog.setStatus(PaymentStatus);
+		statusLog.setTimestamp(arguments.lastTransaction.dateCreated);
+
+		var migrationTransaction = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransaction")
+		var TransactionType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransactionType").fromString("Recurring");
+		migrationTransaction.setAccount(Account);
+		migrationTransaction.setMerchantTransactionId(arguments.lastTransaction.id);
+		migrationTransaction.setAmount(javacast("java.math.BigDecimal", arguments.lastTransaction.price));
+		migrationTransaction.setAutoBillCycle(arguments.billingCycle);
+		migrationTransaction.setBillingDate( arguments.lastTransaction.dateCreated );
+		migrationTransaction.setBillingPlanCycle(arguments.billingCycle);
+		migrationTransaction.setCurrency(arguments.currency);
+		// migrationTransaction.setPaymentProcessor($paymentProcessor);
+		migrationTransaction.setMerchantBillingPlanId( arguments.lastTransaction.billingPlanID );
+		migrationTransaction.setMigrationTransactionItems([ TxnItem ]);
+		//migrationTransaction.setPaymentMethod($paymentMethod);
+		//migrationTransaction.setShippingAddress($address);
+		migrationTransaction.setStatusLog([ statusLog ]);
+		migrationTransaction.setType(TransactionType);
+		// migrationTransaction.setPaymentProcessorTransactionId($paymentProcessorTransactionId);	
+	
+		var result = { message:"OK", code:200, success:true }
+
+		if (!isnull(arguments.dateNextBilling)) {
+			var nextPeriodStartDate = createobject("java","java.util.GregorianCalendar");
+			nextPeriodStartDate.setTime( arguments.dateNextBilling );
+		}
+
+		try {
+			// java.lang.String srd, java.util.Calendar nextPeriodStartDate, MigrationTransaction[] migrationTransactions, java.lang.String cancelReasonCode
+			result.return = AutoBill.migrate("", !isnull(arguments.dateNextBilling) ? nextPeriodStartDate : nullValue(), [migrationTransaction], nullValue());
+			result.soapID = result.return.getReturnObject().getSoapID();
+			result.autobill = AutoBill;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+		}
+
+		LogService.log( result.soapID, "AutoBill", "migrate", result.code, result.message );	
+		return result;
+	}
 }
