@@ -44,7 +44,8 @@ component {
 		var result = { message:"OK", code:200, success:true }
 
 		try {
-			result.return = AutoBill.update("", IAFP, true, arguments.minChargebackProbability, false, false, "", false, "");
+			// java.lang.String srd, ImmediateAuthFailurePolicy immediateAuthFailurePolicy, java.lang.Boolean validateForFuturePayment, java.lang.Integer minChargebackProbability, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy, java.lang.String campaignCode, java.lang.Boolean dryrun, java.lang.String cancelReasonCode
+			result.return = AutoBill.update("", IAFP, true, arguments.minChargebackProbability, true, true, "", false, "");
 			result.soapID = result.return.getReturnObject().getSoapID();
 			result.autobill = AutoBill;
 		}
@@ -226,7 +227,7 @@ component {
 		TxnItem.setServicePeriodEndDate( arguments.lastTransaction.datePeriodEnds );
 		TxnItem.setSku( arguments.productID );
 
-		var creditCardStatusA = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatusCreditCard");
+		var creditCardStatus = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatusCreditCard");
 		var statusLog = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatus");
 		var PaymentMethodType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.PaymentMethodType").fromString("CreditCard");
 		var PaymentStatus = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.TransactionStatusType").fromString("Captured");
@@ -245,7 +246,7 @@ component {
 		migrationTransaction.setBillingDate( arguments.lastTransaction.dateCreated );
 		migrationTransaction.setBillingPlanCycle(arguments.billingCycle);
 		migrationTransaction.setCurrency(arguments.currency);
-		// migrationTransaction.setPaymentProcessor($paymentProcessor);
+		migrationTransaction.setPaymentProcessor("Litle");
 		migrationTransaction.setMerchantBillingPlanId( arguments.lastTransaction.billingPlanID );
 		migrationTransaction.setMigrationTransactionItems([ TxnItem ]);
 		//migrationTransaction.setPaymentMethod($paymentMethod);
