@@ -37,4 +37,10 @@ component {
 		return Account.update(nullValue());
 	}
 
+	any function setPaymentMethodInactive(required string paymentMethodID) {
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod").fetchByMerchantPaymentMethodID('', arguments.paymentMethodID);
+		PaymentMethod.setActive(false);
+		// java.lang.String srd, boolean validate, int minChargebackProbability, boolean replaceOnAllAutoBills, java.lang.String sourceIp, java.lang.Boolean replaceOnAllChildAutoBills, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
+		return PaymentMethod.update('', false, 100, false, nullValue(), false, true, true);
+	}
 }
