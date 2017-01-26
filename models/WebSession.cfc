@@ -36,6 +36,15 @@ component {
 		return result;
 	}
 
+	public struct function getPrivateFormValues() {
+		var result = {}
+		for (local.namevaluepair in getWSO().getPrivateFormValues()) {
+			result[local.namevaluepair.getName()] = local.namevaluepair.getValue();
+		}
+
+		return result;
+	}
+
 	public struct function getPaymentMethod() {
 		if (isnull(variables.paymentmethod))
 			throw("No payment method available.","VindicaCashboxModuleWebsessionException");
