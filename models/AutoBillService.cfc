@@ -189,7 +189,7 @@ component {
 		return result;
 	}
 
-	struct function migrate( required string id, required string accountID, required string productID, required date dateStarted, required struct lastTransaction, required numeric billingCycle, date dateNextBilling, string affiliateID="", string currency="USD", string billingStatementID ) {
+	struct function migrate( required string id, required string accountID, required string productID, required date dateStarted, required struct lastTransaction, required numeric billingCycle, required string paymentMethodID, date dateNextBilling, string affiliateID="", string currency="USD", string billingStatementID ) {
 		var classVersion = Factory.getClassVersion();
 		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
 		var e;
@@ -237,6 +237,9 @@ component {
 		statusLog.setStatus(PaymentStatus);
 		statusLog.setTimestamp(arguments.lastTransaction.dateCreated);
 
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod");
+		PaymentMethod.setMerchantPaymentMethodID( arguments.paymentMethodID );
+
 		var migrationTransaction = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransaction")
 		var TransactionType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.MigrationTransactionType").fromString("Recurring");
 		migrationTransaction.setAccount(Account);
@@ -249,7 +252,7 @@ component {
 		migrationTransaction.setPaymentProcessor("Litle");
 		migrationTransaction.setMerchantBillingPlanId( arguments.lastTransaction.billingPlanID );
 		migrationTransaction.setMigrationTransactionItems([ TxnItem ]);
-		//migrationTransaction.setPaymentMethod($paymentMethod);
+		migrationTransaction.setPaymentMethod(PaymentMethod);
 		//migrationTransaction.setShippingAddress($address);
 		migrationTransaction.setStatusLog([ statusLog ]);
 		migrationTransaction.setType(TransactionType);
@@ -265,8 +268,10 @@ component {
 		try {
 			// java.lang.String srd, java.util.Calendar nextPeriodStartDate, MigrationTransaction[] migrationTransactions, java.lang.String cancelReasonCode
 			result.return = AutoBill.migrate("", !isnull(arguments.dateNextBilling) ? nextPeriodStartDate : nullValue(), [migrationTransaction], nullValue());
-			result.soapID = result.return.getReturnObject().getSoapID();
+			result.soapID = result.return.getSoapID();
 			result.autobill = AutoBill;
+			result.code = result.return.getReturnCode().getValue();
+			result.message = result.return.getReturnString();
 		}
 		catch (com.vindicia.client.VindiciaReturnException e) {
 			result.code = e.returncode;
@@ -274,6 +279,9 @@ component {
 			result.success = false;
 			result.soapID = e.soapID;
 		}
+
+		if (result.code != "200")
+			result.success = false;
 
 		LogService.log( result.soapID, "AutoBill", "migrate", result.code, result.message );	
 		return result;
