@@ -15,7 +15,8 @@ component {
 		return resp;
 	}
 
-	any function update(required string merchantAccountID, string defaultCurrency="USD", required string email, string lang="en", boolean warnAutoBill=false, string company="", required string name) {
+	any function update(required string merchantAccountID, string defaultCurrency="USD", required string email, string lang="en", boolean warnAutoBill=false, string company="", required string name, string zip="", string country="", string shipName="") {
+		var classVersion = Factory.getClassVersion();
 		var Account = Factory.get("com.vindicia.client.Account");
 
 		if (settings.isdev) {
@@ -24,6 +25,8 @@ component {
 			arguments.email = "#local.uid#@scrubbed.com";
 			if (arguments.company.len())
 				arguments.company = "Company Scrubbed";
+			if (arguments.shipName.len())
+				arguments.shipName = "Shipping Name Scrubbed";
 		}
 
 		Account.setMerchantAccountID(arguments.merchantAccountID);
@@ -33,6 +36,13 @@ component {
 		Account.setWarnBeforeAutoBilling(arguments.warnAutoBill);
 		Account.setCompany(arguments.company);
 		Account.setName(arguments.name);
+
+		var Address = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.Address");
+		Address.setCountry(arguments.country);
+		Address.setPostalCode(arguments.zip);
+		Address.setName(arguments.shipName);
+
+		Account.setShippingAddress(Address);
 
 		return Account.update(nullValue());
 	}
