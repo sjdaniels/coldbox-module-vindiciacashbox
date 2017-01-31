@@ -43,4 +43,27 @@ component {
 		// java.lang.String srd, boolean validate, int minChargebackProbability, boolean replaceOnAllAutoBills, java.lang.String sourceIp, java.lang.Boolean replaceOnAllChildAutoBills, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
 		return PaymentMethod.update('', false, 100, false, nullValue(), false, true, true);
 	}
+
+	// ONLY USED FOR CREATING TEST CARDS IN PRODTEST!
+	any function updatePaymentMethod(required string merchantAccountID, required string paymentMethodID, required string accountNum, required date dateExpires) {
+		var classVersion = Factory.getClassVersion();
+		var Account = Factory.get("com.vindicia.client.Account").fetchByMerchantAccountId('',arguments.merchantAccountID);
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod");
+		var cc = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.CreditCard");
+		var PaymentMethodType = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.PaymentMethodType").fromString("CreditCard");
+		var PaymentUpdateBehavior = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.PaymentUpdateBehavior").fromString("Update");
+
+		Account.setMerchantAccountID(arguments.merchantAccountID);
+
+		PaymentMethod.setBillingAddress( Account.getShippingAddress() );
+		PaymentMethod.setMerchantPaymentMethodID( arguments.paymentMethodID );
+
+		cc.setAccount(arguments.accountNum);
+		cc.setExpirationDate(dateformat(arguments.dateExpires,"YYYYMM"));
+		PaymentMethod.setType(PaymentMethodType);
+		PaymentMethod.setCreditCard(cc);
+
+		// java.lang.String srd, PaymentMethod paymentMethod, boolean replaceOnAllAutoBills, PaymentUpdateBehavior updateBehavior, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
+		return Account.updatePaymentMethod('', PaymentMethod, true, PaymentUpdateBehavior, true, true);
+	}
 }
