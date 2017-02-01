@@ -76,4 +76,21 @@ component {
 		// java.lang.String srd, PaymentMethod paymentMethod, boolean replaceOnAllAutoBills, PaymentUpdateBehavior updateBehavior, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
 		return Account.updatePaymentMethod('', PaymentMethod, true, PaymentUpdateBehavior, true, true);
 	}
+
+	any function grantCredit(required string merchantAccountID, required numeric amount, string note="") {
+		var classVersion = Factory.getClassVersion();
+		var Account = Factory.get("com.vindicia.client.Account");
+		
+		Account.setMerchantAccountID(arguments.merchantAccountID);
+		
+		var Credit = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.Credit");
+		var CurrencyAmount = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.CurrencyAmount");
+
+		CurrencyAmount.setAmount( javacast("java.math.BigDecimal", abs(arguments.amount)) );
+		CurrencyAmount.setDescription( arguments.note );
+		Credit.setCurrencyAmounts([ CurrencyAmount ]);
+
+		// java.lang.String srd, Credit credit, java.lang.String note
+		return Account.grantCredit('', Credit, arguments.note);
+	}
 }
