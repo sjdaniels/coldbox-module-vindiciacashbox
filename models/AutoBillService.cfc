@@ -197,6 +197,9 @@ component {
 		AutoBill.setMerchantAutoBillID( arguments.id );
 		AutoBill.setCurrency( arguments.currency );
 		AutoBill.setStartTimestamp( arguments.dateStarted );
+		
+		if (!isnull(arguments.dateNextBilling))
+			AutoBill.setBillingDay( javacast("java.lang.Integer", day(arguments.dateNextBilling)) );
 
 		var Account = Factory.get("com.vindicia.client.Account");
 		Account.setMerchantAccountID( arguments.accountID );
