@@ -2,6 +2,7 @@ component {
 
 	property name="Factory" inject="ObjectFactory@cashbox";
 	property name="settings" inject="coldbox:setting:vindicia";
+	property name="LogService" inject="LogService@cashbox";
 
 	any function fetchByMerchantAccountID(required string id) {
 		var obj = Factory.get("com.vindicia.client.Account");
@@ -51,7 +52,24 @@ component {
 		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod").fetchByMerchantPaymentMethodID('', arguments.paymentMethodID);
 		PaymentMethod.setActive(false);
 		// java.lang.String srd, boolean validate, int minChargebackProbability, boolean replaceOnAllAutoBills, java.lang.String sourceIp, java.lang.Boolean replaceOnAllChildAutoBills, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
-		return PaymentMethod.update('', false, 100, false, nullValue(), false, true, true);
+
+		var result = { success:true };
+		try {
+			result.return = PaymentMethod.update('', false, 100, false, nullValue(), false, true, true);
+			result.soapID = result.return.getReturnObject().getSoapID();
+			result.code = result.return.getReturnObject().getReturnCode().getValue();
+			result.message = result.return.getReturnObject().getReturnString();
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			result.code = e.returncode;
+			result.message = e.message;
+			result.success = false;
+			result.soapID = e.soapID;
+		}
+
+		LogService.log( result.soapID, "PaymentMethod", "update", result.code, result.message );
+
+		return result;
 	}
 
 	// ONLY USED FOR CREATING TEST CARDS IN PRODTEST!
