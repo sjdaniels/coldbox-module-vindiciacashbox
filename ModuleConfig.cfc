@@ -102,7 +102,6 @@ component {
 		ClientConstants.SOAP_PASSWORD = settings.password;
 		ClientConstants.USE_HTTP_COMPRESSION = false;
 		ClientConstants.DEFAULT_TIMEOUT = 90000; // 90 seconds
-		ClientConstants.DEBUG = true;
 	}
 	
 	function onLoad(){
