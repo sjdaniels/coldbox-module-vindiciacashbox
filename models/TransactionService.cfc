@@ -60,7 +60,7 @@ component {
 				result.return = Transaction.auth("", arguments.minChargebackProbability, arguments.sendEmailNotification, "", false)
 			} else {
 				// java.lang.String srd, java.lang.Boolean sendEmailNotification, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy, java.lang.String campaignCode, java.lang.Boolean dryrun, int minChargebackProbability
-				result.return = Transaction.authCapture("", arguments.sendEmailNotification, false, false, "", false, arguments.minChargebackProbability)
+				result.return = Transaction.authCapture("", arguments.sendEmailNotification, true, true, "", false, arguments.minChargebackProbability)
 			}
 			result.soapID = result.return.getReturnObject().getSoapID();
 			result.transactionObj = Transaction;
