@@ -27,7 +27,6 @@ component {
 			,"amount":javacast("numeric",txn.getAmount())
 			,"billingPlanCycle":txn.getBillingPlanCycle()
 			,"currency":txn.getCurrency()
-			,"paymentMethodID":txn.getSourcePaymentMethod().getMerchantPaymentMethodID()
 			,"affiliateID":txn.getMerchantAffiliateID()
 			,"vid":txn.getVID()
 			,"id":txn.getMerchantTransactionID()
@@ -35,6 +34,10 @@ component {
 			,"items":items
 			,"statuslog":statuslog
 			,"dateCreated":txn.getTimestamp().getTime()
+		}
+
+		if (!isnull(txn.getSourcePaymentMethod())) {
+			result["paymentMethodID"] = txn.getSourcePaymentMethod().getMerchantPaymentMethodID();
 		}
 
 		return result;
