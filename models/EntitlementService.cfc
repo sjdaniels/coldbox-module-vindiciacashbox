@@ -41,4 +41,41 @@ component {
 		}
 	}
 
+	array function fetchByAccount(required string accountID) {
+		var result = [];
+		var Entitlement = Factory.get("com.vindicia.client.Entitlement");
+		var e;
+
+		var Account = Factory.get("com.vindicia.client.Account");
+		Account.setMerchantAccountID( arguments.accountID );
+
+		try {
+			// java.lang.String srd, Account account, java.lang.Boolean showAll, java.lang.Boolean includeChildren
+			var response = Entitlement.fetchByAccount("", Account, false, false);
+			for (local.item in (response?:[])) {
+				local.dateEnd = local.item.getEndTimestamp().getTime();
+				local.update = { 
+					 "isActive":local.item.getActive() 
+					,"accountID":local.item.getAccount().getMerchantAccountID() 
+					,"productID":local.item.getMerchantProductID() 
+					,"autobillID":local.item.getMerchantAutobillID() 
+					,"entitlementID":local.item.getMerchantEntitlementID() 
+					,"dateStart":local.item.getStartTimestamp().getTime() 
+					,"description":local.item.getDescription() 
+				}
+
+				if (local.dateEnd lt createdate(2098,1,1)) {
+					local.update["dateEnd"] = local.dateEnd;
+				}
+
+				result.append( local.update );
+			}
+
+			return result;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			LogService.log( e.soapID, "Entitlement", "fetchByAccount", e.returnCode, e.message );		
+			rethrow;
+		}
+	}
 }

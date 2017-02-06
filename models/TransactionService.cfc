@@ -176,4 +176,27 @@ component {
 			rethrow;
 		}
 	}
+
+	array function fetchByAccount(required string accountID, required numeric page, required numeric pageSize) {
+		var result = [];
+		var Transaction = Factory.get("com.vindicia.client.Transaction");
+		var e;
+
+		var Account = Factory.get("com.vindicia.client.Account");
+		Account.setMerchantAccountID( arguments.accountID );
+
+		try {
+			// java.lang.String srd, Account account, java.lang.Boolean includeChildren, java.lang.Integer page, java.lang.Integer pageSize
+			var response = Transaction.fetchByAccount("", Account, false, arguments.page, arguments.pageSize);
+			for (local.txn in (response?:[])) {
+				result.append( getTransaction().populate(local.txn) );
+			}
+
+			return result;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			LogService.log( e.soapID, "Transaction", "fetchByAccount", e.returnCode, e.message );		
+			rethrow;
+		}
+	}
 }

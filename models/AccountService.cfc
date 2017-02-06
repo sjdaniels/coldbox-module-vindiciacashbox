@@ -93,4 +93,42 @@ component {
 		// java.lang.String srd, Credit credit, java.lang.String note
 		return Account.grantCredit('', Credit, arguments.note);
 	}
+
+	array function fetchPaymentMethods(required string accountID) {
+		var result = [];
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod");
+		var e;
+
+		var Account = Factory.get("com.vindicia.client.Account");
+		Account.setMerchantAccountID( arguments.accountID );
+
+		try {
+			// java.lang.String srd, Account account, java.lang.Boolean includeChildren
+			var response = PaymentMethod.fetchByAccount("", Account, false);
+			for (local.pm in (response?:[])) {
+				local.item = [
+					 "id": local.pm.getMerchantPaymentMethodID()
+					,"accountID": arguments.accountID
+					,"vid": local.pm.getVID()
+					,"type": local.pm.getType().getValue()
+					,"accountHolder": local.pm.getAccountHolderName()
+				]
+
+				if (local.item.type == "CreditCard") {
+					local.item["lastDigits"] = local.pm.getCreditCard().getLastDigits();
+					local.item["dateExpires"] = createdate(local.pm.getCreditCard().getExpirationDate().left(4), local.pm.getCreditCard().getExpirationDate().right(2), daysInMonth(createDate(local.pm.getCreditCard().getExpirationDate().left(4), local.pm.getCreditCard().getExpirationDate().right(2),1)));
+					local.item["accountLength"] = local.pm.getCreditCard().getAccountLength();
+					local.item["bin"] = local.pm.getCreditCard().getBin();
+				}
+
+				result.append( local.item );
+			}
+
+			return result;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			LogService.log( e.soapID, "PaymentMethod", "fetchByAccount", e.returnCode, e.message );		
+			rethrow;
+		}
+	}	
 }
