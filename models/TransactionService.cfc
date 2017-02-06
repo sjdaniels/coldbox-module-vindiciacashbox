@@ -6,6 +6,10 @@ component {
 
 	function getTransaction() provider="Transaction@cashbox" {}
 
+	string function createTransactionID() {
+		return settings.txnprefix & "X" & dateTimeFormat(now(),"yyyymmddHHNNssLLL");
+	}
+
 	struct function authCapture(required string id, required string ip, required string accountID, required string paymentmethodID, required array products, string affiliateID="", string currency="USD", string billingStatementID, boolean sendEmailNotification=false, numeric minChargebackProbability=100) {
 		arguments.authOnly = false;
 		return auth( argumentCollection = arguments );
