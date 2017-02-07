@@ -1,6 +1,11 @@
 component {
 
+	property name="settings" inject="coldbox:setting:vindicia";
+
 	function get(required string class) {
+		if (settings.debug ?: false)
+			return createObject("java", arguments.class, [expandpath("/cashbox/lib/vindicia_DEBUG.jar")]);
+		
 		return createObject("java", arguments.class, [expandpath("/cashbox/lib/vindicia.jar")]);
 	}
 
