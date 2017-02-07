@@ -7,7 +7,7 @@ component {
 		arguments.returncode = javacast("numeric",arguments.returncode);
 
 		if (wirebox.containsInstance("MongoDB")) {
-			wirebox.getInstance("MongoDB").getCollection("vindiciacashbox_soap_log").save(["object":arguments.object, "method":arguments.method, "soapID":arguments.soapID, "returnCode":arguments.returnCode, "returnString":arguments.returnString]);
+			wirebox.getInstance("MongoDB").getCollection("cashbox_soap_log").save(["object":arguments.object, "method":arguments.method, "soapID":arguments.soapID, "returnCode":arguments.returnCode, "returnString":arguments.returnString]);
 			return;
 		}
 
