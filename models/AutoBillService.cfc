@@ -299,4 +299,51 @@ component {
 		LogService.log( result.soapID, "AutoBill", "migrate", result.code, result.message );	
 		return result;
 	}
+
+	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize) {
+		var result = [];
+		var Autobill = Factory.get("com.vindicia.client.AutoBill");
+		var e;
+
+		local.start = createobject("java","java.util.GregorianCalendar");
+		local.start.setTime( arguments.tsDelta );
+
+		try {
+			// java.lang.String srd, java.util.Calendar timestamp, int page, int pageSize, java.util.Calendar endTimestamp, AutoBillEventType[] selectEvents
+			var response = Autobill.fetchDeltaSince("", local.start, arguments.page, arguments.pageSize, nullValue(), nullValue());
+			for (local.item in (response?:[])) {
+				local.update = { 
+					 "id":local.item.getMerchantAutobillID() 
+					,"billingDay":local.item.getBillingDay() 
+					,"billingState":local.item.getBillingState().getValue()
+					,"accountID":local.item.getAccount().getMerchantAccountID() 
+					,"currency":local.item.getCurrency() 
+					,"status":local.item.getStatus().getValue() 
+					,"dateStart":local.item.getStartTimestamp().getTime() 
+					,"vid":local.item.getVID() 
+				}
+
+				if (!isnull(local.item.getNextBilling()))
+					local.update["dateNextBilling"] = local.item.getNextBilling().getTimestamp().getTime();
+
+				if (!isnull(local.item.getEndTimestamp()))
+					local.update["dateEnd"] = local.item.getEndTimestamp().getTime();
+
+				local.items = []
+				for (local.product in (local.item.getItems()?:[])) {
+					local.items.append( local.product.getProduct().getMerchantProductID() );
+				}
+
+				local.update["items"] = local.items;
+
+				result.append( local.update );
+			}
+
+			return result;
+		}
+		catch (com.vindicia.client.VindiciaReturnException e) {
+			LogService.log( e.soapID, "Entitlement", "fetchDeltaSince", e.returnCode, e.message );		
+			rethrow;
+		}
+	}	
 }
