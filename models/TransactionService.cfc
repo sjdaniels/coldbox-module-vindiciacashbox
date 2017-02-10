@@ -127,13 +127,18 @@ component {
 		return result;
 	}
 
-	struct function refund(required string transactionID, numeric amount) {
-		var Transaction = Factory.get("com.vindicia.client.Transaction").fetchByMerchantTransactionID("",arguments.transactionID );
+	struct function refund(required string transactionID, numeric amount, string note) {
+		var Transaction = Factory.get("com.vindicia.client.Transaction");
 		var Refund = Factory.get("com.vindicia.client.Refund");
 		var RefundClient = Factory.get("com.vindicia.client.Refund");
 
+		Transaction.setMerchantTransactionID(arguments.transactionID);
+
 		Refund.setTransaction( Transaction );
 		Refund.setAmount( javacast("java.math.BigDecimal",arguments.amount) );
+		
+		if (!isnull(arguments.note))
+			Refund.setNote( arguments.note );
 
 		var e;
 		var result = { message:"OK", code:200 }
