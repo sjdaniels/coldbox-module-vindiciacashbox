@@ -49,12 +49,13 @@ component {
 	}
 
 	any function setPaymentMethodInactive(required string paymentMethodID) {
-		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod").fetchByMerchantPaymentMethodID('', arguments.paymentMethodID);
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod");
+		PaymentMethod.setMerchantPaymentMethodID( arguments.paymentMethodID );
 		PaymentMethod.setActive(false);
-		// java.lang.String srd, boolean validate, int minChargebackProbability, boolean replaceOnAllAutoBills, java.lang.String sourceIp, java.lang.Boolean replaceOnAllChildAutoBills, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
 
 		var result = { success:true };
 		try {
+			// java.lang.String srd, boolean validate, int minChargebackProbability, boolean replaceOnAllAutoBills, java.lang.String sourceIp, java.lang.Boolean replaceOnAllChildAutoBills, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy
 			result.return = PaymentMethod.update('', false, 100, false, nullValue(), false, true, true);
 			result.soapID = result.return.getReturnObject().getSoapID();
 			result.code = result.return.getReturnObject().getReturnCode().getValue();

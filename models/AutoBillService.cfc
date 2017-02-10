@@ -18,14 +18,25 @@ component {
 
 		var Account = Factory.get("com.vindicia.client.Account");
 		Account.setMerchantAccountID( arguments.accountID );
-		AutoBill.setAccount( Account );
 
-		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod");
-		PaymentMethod.setMerchantPaymentMethodID( arguments.paymentmethodID );
-		AutoBill.setPaymentMethod( PaymentMethod );
+		var PaymentMethod = Factory.get("com.vindicia.client.PaymentMethod").fetchByMerchantPaymentMethodID('', arguments.paymentmethodID);
+		var PaymentMethodSparse = Factory.get("com.vindicia.client.PaymentMethod");
+		PaymentMethodSparse.setMerchantPaymentMethodID( arguments.paymentmethodID );
+		AutoBill.setPaymentMethod( PaymentMethodSparse );
+		
+		Account.setShippingAddress( PaymentMethod.getBillingAddress() );
+		AutoBill.setAccount( Account );
 		
 		var Item = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItem");
 		var Product = Factory.get("com.vindicia.client.Product");
+		
+		// prodtest only daily recycle
+		if (settings.isdev) {
+			var BillingPlan = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.BillingPlan");
+			BillingPlan.setMerchantBillingPlanId("RENEW_DEV");
+			AutoBill.setBillingPlan(BillingPlan);
+		}
+
 
 		Product.setMerchantProductID( arguments.productID );
 
@@ -137,8 +148,10 @@ component {
 
 	struct function modify( required string autobillID, boolean prorate=true, string effectiveDate="today", string replaceBillingPlan, array replaceProducts=[], boolean dryrun=false ) {
 		var classVersion = Factory.getClassVersion();
-		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
 		var ItemModifications = [];
+
+		AutoBill.setMerchantAutoBillID(arguments.autobillID);
 
 		for (local.replaceProduct in arguments.replaceProducts) {
 			var RemoveProduct = Factory.get("com.vindicia.client.Product");
@@ -147,8 +160,10 @@ component {
 			RemoveItem.setProduct( RemoveProduct );
 
 			var AddProduct = Factory.get("com.vindicia.client.Product").fetchByMerchantProductID("", local.replaceProduct.add);
+			var AddProductSparse = Factory.get("com.vindicia.client.Product");
+			AddProductSparse.setMerchantProductID( local.replaceProduct.add );
 			var AddItem = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItem");
-			AddItem.setProduct( AddProduct );
+			AddItem.setProduct( AddProductSparse );
 		
 			var Modification = Factory.get("com.vindicia.soap.#classVersion#.Vindicia.AutoBillItemModification");
 			Modification.setRemoveAutobillItem( RemoveItem );
@@ -159,12 +174,14 @@ component {
 
 		var NewBillingPlan;
 		if (!isnull(arguments.replaceBillingPlan)) {
-			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan").fetchByMerchantBillingPlanID("", arguments.replaceBillingPlan);
+			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan");
+			NewBillingPlan.setMerchantBillingPlanId( arguments.replaceBillingPlan );
 		}
 
 		if (isnull(arguments.replaceBillingPlan) && arguments.replaceProducts.len()==1) {
 		// set the new billingplan to the default for the new product
-			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan").fetchByMerchantBillingPlanID("", AddProduct.getDefaultBillingPlan().getMerchantBillingPlanID());
+			NewBillingPlan = Factory.get("com.vindicia.client.BillingPlan");
+			NewBillingPlan.setMerchantBillingPlanId( AddProduct.getDefaultBillingPlan().getMerchantBillingPlanID() );
 		}
 
 		var result = { message:"OK", code:200, success:true }
