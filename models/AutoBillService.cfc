@@ -97,7 +97,8 @@ component {
 	}
 
 	struct function cancel( required string autobillID, boolean disentitle=false, boolean settle=false, boolean sendNotice=false, string reasonCode="" ) {
-		var AutoBill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+		var AutoBill = Factory.get("com.vindicia.client.AutoBill");
+		AutoBill.setMerchantAutobillID( arguments.autobillID );
 
 		var result = { message:"OK", code:200, success:true }
 		try {
