@@ -56,15 +56,15 @@ component {
 
 		try {
 			// java.lang.String srd, ImmediateAuthFailurePolicy immediateAuthFailurePolicy, java.lang.Boolean validateForFuturePayment, java.lang.Integer minChargebackProbability, java.lang.Boolean ignoreAvsPolicy, java.lang.Boolean ignoreCvnPolicy, java.lang.String campaignCode, java.lang.Boolean dryrun, java.lang.String cancelReasonCode
-			result.return = AutoBill.update("", IAFP, true, arguments.minChargebackProbability, true, true, "", false, "");
+			result.return = AutoBill.update("", IAFP, true, arguments.minChargebackProbability, true, false, "", false, "");
 			result.soapID = result.return.getReturnObject().getSoapID();
 			result.autobill = AutoBill;
 		}
-		catch (com.vindicia.client.VindiciaReturnException e) {
-			result.code = e.returncode;
-			result.message = e.message;
+		catch (com.vindicia.client.VindiciaReturnException local.e) {
+			result.code = local.e.ReturnCode;
+			result.message = local.e.Message;
 			result.success = false;
-			result.soapID = e.soapID;
+			result.soapID = local.e.SoapID;
 		}
 
 		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
