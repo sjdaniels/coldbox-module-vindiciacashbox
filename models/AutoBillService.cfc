@@ -287,7 +287,7 @@ component {
 		//migrationTransaction.setShippingAddress($address);
 		migrationTransaction.setStatusLog([ statusLog ]);
 		migrationTransaction.setType(TransactionType);
-		// migrationTransaction.setPaymentProcessorTransactionId($paymentProcessorTransactionId);	
+		migrationTransaction.setPaymentProcessorTransactionId(arguments.lastTransaction.paymentprocessorID);	
 	
 		var result = { message:"OK", code:200, success:true }
 
