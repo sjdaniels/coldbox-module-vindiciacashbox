@@ -156,7 +156,7 @@ component {
 		return result;		
 	}
 
-	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize) {
+	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize, date tsEnd=now()) {
 		var result = [];
 		var Transaction = Factory.get("com.vindicia.client.Transaction");
 		var e;
@@ -165,7 +165,7 @@ component {
 		local.end = createobject("java","java.util.GregorianCalendar");
 
 		local.start.setTime( arguments.tsDelta );
-		local.end.setTime( now() );
+		local.end.setTime( arguments.tsEnd );
 
 		try {
 			// java.lang.String srd, java.util.Calendar timestamp, java.util.Calendar endTimestamp, java.lang.Integer page, java.lang.Integer pageSize, PaymentMethod paymentMethod
