@@ -86,6 +86,15 @@ component {
 		return local.result;
 	}
 
+	function getBillingState( required string autobillID ) {
+		local.autobill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
+		if (isnull(local.autobill))
+			return;
+
+		local.billingstate = local.autobill.getBillingState().getValue();
+		return local.billingstate;
+	}
+
 	function getCurrency( required string autobillID ) {
 		local.autobill = Factory.get("com.vindicia.client.AutoBill").fetchByMerchantAutobillID("", arguments.autobillID);
 		if (isnull(local.autobill))
