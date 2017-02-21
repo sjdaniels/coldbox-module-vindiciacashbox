@@ -79,7 +79,8 @@ component {
 			result.soapID = e.soapID;
 		}
 
-		LogService.log( result.soapID, "Transaction", arguments.authOnly?"auth":"authCapture", result.code, result.message );
+		local.details = {"merchantAccountID":arguments.accountID, "products":arguments.products, "authOnly":arguments.authOnly, "merchantPaymentMethodID":arguments.paymentmethodID, "merchantTransactionID":arguments.id}
+		LogService.log( result.soapID, "Transaction", arguments.authOnly?"auth":"authCapture", result.code, result.message, local.details );
 		return result;
 	}
 
@@ -96,6 +97,8 @@ component {
 
 		var e;
 		var result = { message:"OK", code:200 }
+
+		local.details = {"transactionIDs":arguments.transactionIDs}
 
 		try {
 			result.return = Transaction.capture("", Transactions);
@@ -122,7 +125,7 @@ component {
 			result.soapID = e.soapID;
 		}
 
-		LogService.log( result.soapID, "Transaction", "capture", result.code, result.message );		
+		LogService.log( result.soapID, "Transaction", "capture", result.code, result.message, local.details );		
 
 		return result;
 	}
@@ -143,13 +146,15 @@ component {
 		var e;
 		var result = { message:"OK", code:200 }
 
+		local.details = {"transactionID":arguments.transactionID, "amount":arguments.amount, "note":arguments.note}
+
 		try {
 			result.refunds = RefundClient.perform( "", [ Refund ] );
 			result.refund = result.refunds[1];
 			result.success = (result.refund.getStatus().getValue() != "Failed");
 		}
 		catch (com.vindicia.client.VindiciaReturnException e) {
-			LogService.log( e.soapID, "Refund", "perform", e.returncode, e.message );		
+			LogService.log( e.soapID, "Refund", "perform", e.returncode, e.message, local.details );		
 			rethrow;
 		}
 

@@ -67,7 +67,8 @@ component {
 			result.soapID = local.e.SoapID;
 		}
 
-		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
+		local.details = { "merchantAccountID":arguments.accountID, "productID":arguments.productID, "affiliateID":arguments.affiliateID }
+		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message, local.details );
 	
 		return result;
 	}
@@ -124,6 +125,7 @@ component {
 			result.soapID = e.soapID;
 		}
 
+		local.details = {"merchantAutoBillID":arguments.autobillID, "disentitle":arguments.disentitle, "settle":arguments.settle}
 		LogService.log( result.soapID, "AutoBill", "cancel", result.code, result.message );
 		return result;
 	}
@@ -142,17 +144,19 @@ component {
 
 		var result = { message:"OK", code:200, success:true }
 
+		local.details = {"merchantAutoBillID":arguments.autobillID, "subaction":"Resume"}
+
 		try {
 			result.return = AutoBill.update("", nullValue(), false, 100, true, true, "", false, "");
 			result.soapID = result.return.getReturnObject().getSoapID();
 			result.autobill = AutoBill;
 		}
 		catch (com.vindicia.client.VindiciaReturnException e) {
-			LogService.log( e.soapID, "AutoBill", "update", e.returncode, e.message );
+			LogService.log( e.soapID, "AutoBill", "update", e.returncode, e.message, local.details );
 			rethrow;
 		}
 
-		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message );
+		LogService.log( result.soapID, "AutoBill", "update", result.code, result.message, local.details );
 		return result;
 	}
 
@@ -194,6 +198,8 @@ component {
 			NewBillingPlan.setMerchantBillingPlanId( AddProduct.getDefaultBillingPlan().getMerchantBillingPlanID() );
 		}
 
+		local.details = {"merchantAutobillID":arguments.autobillID, "dryrun":arguments.dryrun, "replaceProducts":arguments.replaceProducts, "replaceBillingPlan":arguments.replaceBillingPlan?:nullValue()}
+
 		var result = { message:"OK", code:200, success:true }
 		try {
 			// java.lang.String srd, boolean billProratedPeriod, java.lang.String effectiveDate, BillingPlan changeBillingPlanTo, AutoBillItemModification[] autoBillItemModifications, java.lang.Boolean dryrun
@@ -218,11 +224,11 @@ component {
 			result.message = e.message;
 			result.success = false;
 			result.soapID = e.soapID;
-			LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message );
+			LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message, local.details );
 			rethrow;
 		}
 
-		LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message );
+		LogService.log( result.soapID, "AutoBill", "modify", result.code, result.message, local.details );
 		return result;
 	}
 
