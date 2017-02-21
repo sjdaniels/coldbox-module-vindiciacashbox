@@ -35,7 +35,8 @@ component {
 
 		local.result = ws.initialize(nullValue());
 
-		LogService.log( local.result.getSoapId(), "WebSession", "initialize", local.result.getReturnCode().getValue(), local.result.getReturnString() );
+		local.details = {"privateFormValues":arguments.privateFormValues, "methodParamValues":arguments.methodParamValues, "sessionID":ws.getVID()};
+		LogService.log( local.result.getSoapId(), "WebSession", "initialize", local.result.getReturnCode().getValue(), local.result.getReturnString(), local.details );
 
 		if (local.result.getReturnCode().getValue() != 200) {
 			_throw(local.result.getReturnString(), local.result.getReturnCode().getValue());
@@ -55,8 +56,8 @@ component {
 		var ws = getByVID(arguments.sessionID);
 		var wso = ws.getWSO();
     	local.result = wso.finalize_via_SOAP(nullValue());
-
-		LogService.log( local.result.getSoapId(), "WebSession", "finalize", local.result.getReturnCode().getValue(), local.result.getReturnString() );
+    	local.details = {"sessionID":arguments.sessionID}
+		LogService.log( local.result.getSoapId(), "WebSession", "finalize", local.result.getReturnCode().getValue(), local.result.getReturnString(), local.details );
     	return ws;
 	}
 
