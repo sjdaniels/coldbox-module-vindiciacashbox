@@ -126,7 +126,7 @@ component {
 		}
 
 		local.details = {"merchantAutoBillID":arguments.autobillID, "disentitle":arguments.disentitle, "settle":arguments.settle}
-		LogService.log( result.soapID, "AutoBill", "cancel", result.code, result.message );
+		LogService.log( result.soapID, "AutoBill", "cancel", result.code, result.message, local.details );
 		return result;
 	}
 

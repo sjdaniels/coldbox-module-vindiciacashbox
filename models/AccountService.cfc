@@ -68,7 +68,8 @@ component {
 			result.soapID = e.soapID;
 		}
 
-		LogService.log( result.soapID, "PaymentMethod", "update", result.code, result.message );
+		local.details = {"paymentMethodID":arguments.paymentMethodID}
+		LogService.log( result.soapID, "PaymentMethod", "update", result.code, result.message, local.details );
 
 		return result;
 	}
