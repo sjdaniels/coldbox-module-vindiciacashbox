@@ -57,7 +57,7 @@ component {
 		var wso = ws.getWSO();
     	local.result = wso.finalize_via_SOAP(nullValue());
     	local.details = {"sessionID":arguments.sessionID}
-		LogService.log( local.result.getSoapId(), "WebSession", "finalize", local.result.getReturnCode().getValue(), local.result.getReturnString(), local.details );
+		LogService.log( local.result.getSoapId(), "WebSession", "finalize", ws.getResult().code, ws.getResult().message, local.details );
     	return ws;
 	}
 
