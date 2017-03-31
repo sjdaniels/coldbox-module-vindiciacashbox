@@ -15,7 +15,10 @@ component {
 			// java.lang.String srd, java.util.Calendar timestamp, int page, int pageSize, java.util.Calendar endTimestamp
 			var response = Entitlement.fetchDeltaSince("", local.start, arguments.page, arguments.pageSize, nullValue());
 			for (local.item in (response?:[])) {
-				local.dateEnd = local.item.getEndTimestamp().getTime();
+				if (!isnull(local.item.getEndTimestamp())) {
+					local.dateEnd = local.item.getEndTimestamp().getTime();
+				}
+				
 				local.update = { 
 					 "isActive":local.item.getActive() 
 					,"accountID":local.item.getAccount().getMerchantAccountID() 
@@ -26,7 +29,7 @@ component {
 					,"description":local.item.getDescription() 
 				}
 
-				if (local.dateEnd lt createdate(2098,1,1)) {
+				if (!isnull(local.dateEnd) && local.dateEnd lt createdate(2098,1,1)) {
 					local.update["dateEnd"] = local.dateEnd;
 				}
 
@@ -53,7 +56,9 @@ component {
 			// java.lang.String srd, Account account, java.lang.Boolean showAll, java.lang.Boolean includeChildren
 			var response = Entitlement.fetchByAccount("", Account, false, false);
 			for (local.item in (response?:[])) {
-				local.dateEnd = local.item.getEndTimestamp().getTime();
+				if (!isnull(local.item.getEndTimestamp())) {
+					local.dateEnd = local.item.getEndTimestamp().getTime();
+				}
 				local.update = { 
 					 "isActive":local.item.getActive() 
 					,"accountID":local.item.getAccount().getMerchantAccountID() 
@@ -64,7 +69,7 @@ component {
 					,"description":local.item.getDescription() 
 				}
 
-				if (local.dateEnd lt createdate(2098,1,1)) {
+				if (!isnull(local.dateEnd) && local.dateEnd lt createdate(2098,1,1)) {
 					local.update["dateEnd"] = local.dateEnd;
 				}
 
