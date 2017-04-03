@@ -3,7 +3,7 @@ component {
 	property name="Factory" inject="ObjectFactory@cashbox";
 	property name="LogService" inject="LogService@cashbox";
 
-	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize) {
+	array function fetchDeltaSince(required date tsDelta, required numeric page, required numeric pageSize, date endTimestamp) {
 		var result = [];
 		var Entitlement = Factory.get("com.vindicia.client.Entitlement");
 		var e;
@@ -11,9 +11,14 @@ component {
 		local.start = createobject("java","java.util.GregorianCalendar");
 		local.start.setTime( arguments.tsDelta );
 
+		if (!isnull(arguments.endTimestamp)) {
+			local.end = createobject("java","java.util.GregorianCalendar");
+			local.end.setTime( arguments.endTimestamp );
+		}
+
 		try {
 			// java.lang.String srd, java.util.Calendar timestamp, int page, int pageSize, java.util.Calendar endTimestamp
-			var response = Entitlement.fetchDeltaSince("", local.start, arguments.page, arguments.pageSize, nullValue());
+			var response = Entitlement.fetchDeltaSince("", local.start, arguments.page, arguments.pageSize, local.end?:nullValue());
 			for (local.item in (response?:[])) {
 				if (!isnull(local.item.getEndTimestamp())) {
 					local.dateEnd = local.item.getEndTimestamp().getTime();
