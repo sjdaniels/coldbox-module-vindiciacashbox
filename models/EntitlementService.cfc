@@ -22,6 +22,8 @@ component {
 			for (local.item in (response?:[])) {
 				if (!isnull(local.item.getEndTimestamp())) {
 					local.dateEnd = local.item.getEndTimestamp().getTime();
+				} else {
+					local.dateEnd = nullValue();
 				}
 				
 				local.update = { 
